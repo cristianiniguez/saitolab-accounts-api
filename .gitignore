@@ -36,3 +36,9 @@ lerna-debug.log*
 
 # docker clumes
 .mongo_data
+
+# .env
+.env
+.env.development
+.env.staging
+.env.production
