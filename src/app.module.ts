@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { environments } from './environments';
+import { DatabaseModule } from './database/database.module';
 import config from './config';
 
 @Module({
@@ -22,6 +23,7 @@ import config from './config';
         MONGO_CONNECTION: Joi.string().required(),
       }),
     }),
+    DatabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
