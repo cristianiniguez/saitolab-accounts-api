@@ -2,6 +2,8 @@ import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
+import { User } from 'src/users/entities/user.entity';
+
 import { AuthService } from '../services/auth.service';
 import { SignUpDTO } from '../dtos/signup.dto';
 
@@ -17,6 +19,6 @@ export class AuthController {
   @Post('sign-in')
   @UseGuards(AuthGuard('basic'))
   signIn(@Req() req: Request) {
-    return req.user;
+    return this.authService.generateJWT(req.user as User);
   }
 }
