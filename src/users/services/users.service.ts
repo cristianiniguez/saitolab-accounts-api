@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
+import { removePassword } from 'src/utils/user';
+
 import { User } from '../entities/user.entity';
 import { CreateUserDTO } from '../dtos/users.dto';
 
@@ -33,9 +35,7 @@ export class UsersService {
     newUser.password = hashedPassword;
 
     const savedUser = await newUser.save();
-
-    const { password: _, ...user } = savedUser.toJSON();
-    return user;
+    return removePassword(savedUser);
   }
 
   async remove(id: string) {

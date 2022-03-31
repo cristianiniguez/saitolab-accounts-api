@@ -4,7 +4,10 @@ import * as bcrypt from 'bcrypt';
 
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
+import { removePassword } from 'src/utils/user';
+
 import { SignUpDTO } from '../dtos/signup.dto';
+import { Payload } from '../models/payload.model';
 import { Role } from '../models/role.model';
 
 @Injectable()
@@ -25,12 +28,11 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return null;
 
-    const { password: _, ...userWithoutPassword } = user.toJSON();
-    return userWithoutPassword;
+    return removePassword(user);
   }
 
   generateJWT(user: User) {
-    const payload = { sub: user.id };
+    const payload: Payload = { sub: user._id };
     return {
       access_token: this.jwtService.sign(payload),
       user,
