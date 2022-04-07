@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import {
-  IsDate,
+  IsDateString,
   IsIn,
   IsMongoId,
   IsNotEmpty,
@@ -21,7 +21,7 @@ export class CreateMoveDTO {
   @IsNotEmpty()
   amount: number;
 
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty()
   date: Date;
 
