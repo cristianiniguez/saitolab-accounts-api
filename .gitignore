@@ -34,8 +34,9 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# docker clumes
+# docker volumes
 .mongo_data
+.postgres_data
 
 # .env
 .env
