@@ -1,25 +1,21 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 import { MoveType } from '../models/move.model';
-import { Account } from './account.entity';
 
-@Schema()
-export class Move extends Document {
-  @Prop({ required: true })
+@Entity()
+export class Move {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ length: 64, nullable: false, type: 'varchar' })
   detail: string;
 
-  @Prop({ required: true })
+  @Column({ nullable: false, type: 'decimal' })
   amount: number;
 
-  @Prop({ required: true })
+  @Column({ nullable: false, type: 'date' })
   date: Date;
 
-  @Prop({ required: true })
+  @Column({ length: 8, nullable: false, type: 'varchar' })
   type: MoveType;
-
-  @Prop({ ref: Account.name, required: true, type: Types.ObjectId })
-  account: Account | Types.ObjectId;
 }
-
-export const MoveSchema = SchemaFactory.createForClass(Move);

@@ -1,15 +1,15 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { User } from 'src/users/entities/user.entity';
 
-@Schema()
-export class Account extends Document {
-  @Prop({ required: true })
+@Entity()
+export class Account {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ length: 64, nullable: false, type: 'varchar' })
   name: string;
 
-  @Prop({ ref: User.name, required: true, type: Types.ObjectId })
-  user: User | Types.ObjectId;
+  @ManyToOne(() => User)
+  user: User;
 }
-
-export const AccountSchema = SchemaFactory.createForClass(Account);

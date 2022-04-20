@@ -1,20 +1,15 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AccountsController } from './controllers/accounts.controller';
 import { MovesController } from './controllers/moves.controller';
 import { AccountsService } from './services/accounts.service';
 import { MovesService } from './services/moves.service';
-import { Account, AccountSchema } from './entities/account.entity';
-import { Move, MoveSchema } from './entities/move.entity';
+import { Account } from './entities/account.entity';
+import { Move } from './entities/move.entity';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Account.name, schema: AccountSchema },
-      { name: Move.name, schema: MoveSchema },
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([Account, Move])],
   controllers: [AccountsController, MovesController],
   providers: [AccountsService, MovesService],
 })

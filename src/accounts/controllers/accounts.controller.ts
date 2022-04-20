@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Req,
@@ -13,7 +14,6 @@ import { Request } from 'express';
 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { User } from 'src/users/entities/user.entity';
-import { MongoIdPipe } from 'src/common/mongo-id.pipe';
 
 import { AccountsService } from '../services/accounts.service';
 import { CreateAccountDTO, UpdateAccountDTO } from '../dtos/accounts.dto';
@@ -29,7 +29,7 @@ export class AccountsController {
   }
 
   @Get(':id')
-  findOne(@Req() request: Request, @Param('id', MongoIdPipe) id: string) {
+  findOne(@Req() request: Request, @Param('id', ParseIntPipe) id: number) {
     return this.accountsService.findOne(id, request.user as User);
   }
 
@@ -41,14 +41,14 @@ export class AccountsController {
   @Put(':id')
   update(
     @Req() request: Request,
-    @Param('id', MongoIdPipe) id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateAccountDTO,
   ) {
     return this.accountsService.update(id, data, request.user as User);
   }
 
   @Delete(':id')
-  delete(@Req() request: Request, @Param('id', MongoIdPipe) id: string) {
+  delete(@Req() request: Request, @Param('id', ParseIntPipe) id: number) {
     return this.accountsService.remove(id, request.user as User);
   }
 }
