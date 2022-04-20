@@ -13,12 +13,12 @@ export class AccountsService {
   ) {}
 
   findAll(user: User) {
-    return this.accountModel.find({ user: user._id }).exec();
+    return this.accountModel.find({ user: user.id }).exec();
   }
 
   async findOne(id: string, user: User) {
     const account = await this.accountModel
-      .findOne({ _id: id, user: user._id })
+      .findOne({ id: id, user: user.id })
       .exec();
 
     if (!account)
@@ -28,14 +28,14 @@ export class AccountsService {
   }
 
   create(data: CreateAccountDTO, user: User) {
-    const newAccount = new this.accountModel({ ...data, user: user._id });
+    const newAccount = new this.accountModel({ ...data, user: user.id });
     return newAccount.save();
   }
 
   async update(id: string, data: UpdateAccountDTO, user: User) {
     const account = await this.accountModel
       .findOneAndUpdate(
-        { _id: id, user: user._id },
+        { id: id, user: user.id },
         { $set: data },
         { new: true },
       )
@@ -49,7 +49,7 @@ export class AccountsService {
 
   async remove(id: string, user: User) {
     const account = await this.accountModel
-      .findOneAndDelete({ _id: id, user: user._id })
+      .findOneAndDelete({ id: id, user: user.id })
       .exec();
 
     if (!account)

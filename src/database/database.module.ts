@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigType } from '@nestjs/config';
 
 import config from 'src/config';
@@ -7,20 +7,22 @@ import config from 'src/config';
 @Global()
 @Module({
   imports: [
-    MongooseModule.forRootAsync({
+    TypeOrmModule.forRootAsync({
       inject: [config.KEY],
       useFactory: (configService: ConfigType<typeof config>) => {
-        const { connection, dbName, host, password, user } =
-          configService.mongo;
         return {
-          dbName,
-          pass: password,
-          uri: `${connection}://${host}`,
-          user,
+          autoLoadEntities: true,
+          ssl:
+            configService.env === 'production'
+              ? { rejectUnauthorized: false }
+              : false,
+          synchronize: false,
+          type: 'postgres',
+          url: configService.databaseUrl,
         };
       },
     }),
   ],
-  exports: [MongooseModule],
+  exports: [TypeOrmModule],
 })
 export class DatabaseModule {}

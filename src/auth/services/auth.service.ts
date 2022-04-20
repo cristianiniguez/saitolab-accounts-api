@@ -18,7 +18,7 @@ export class AuthService {
   ) {}
 
   createUser(data: SignUpDTO) {
-    this.usersService.create({ ...data, role: Role.CLIENT });
+    return this.usersService.create({ ...data, role: Role.CLIENT });
   }
 
   async validateUser(email: string, password: string) {
@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   generateJWT(user: User) {
-    const payload: Payload = { sub: user._id };
+    const payload: Payload = { sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
       user,

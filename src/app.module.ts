@@ -9,7 +9,7 @@ import { environments } from './environments';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { AccountsModule } from './accounts/accounts.module';
+// import { AccountsModule } from './accounts/accounts.module';
 import config from './config';
 
 @Module({
@@ -19,17 +19,14 @@ import config from './config';
       isGlobal: true,
       load: [config],
       validationSchema: Joi.object({
-        MONGO_USERNAME: Joi.string().required(),
-        MONGO_PASSWORD: Joi.string().required(),
-        MONGO_DB: Joi.string().required(),
-        MONGO_HOST: Joi.string().required(),
-        MONGO_CONNECTION: Joi.string().required(),
+        DATABASE_URL: Joi.string().required(),
+        JWT_SECRET: Joi.string().required(),
       }),
     }),
     DatabaseModule,
     UsersModule,
     AuthModule,
-    AccountsModule,
+    // AccountsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

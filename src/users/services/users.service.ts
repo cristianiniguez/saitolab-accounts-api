@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { removePassword } from 'src/utils/user';
@@ -10,37 +10,25 @@ import { CreateUserDTO } from '../dtos/users.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
 
-  findAll() {
-    return this.userModel.find().exec();
-  }
-
-  async findOne(id: string) {
-    const user = await this.userModel.findById(id).exec();
+  async findOne(id: number) {
+    const user = await this.userRepo.findOne(id);
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
     return user;
   }
 
   findByEmail(email: string) {
-    return this.userModel.findOne({ email }).exec();
+    return this.userRepo.findOne({ where: { email } });
   }
 
   async create(data: CreateUserDTO) {
-    const newUser = new this.userModel(data);
-
-    // TODO: check if email is already used
+    const newUser = this.userRepo.create(data);
 
     const hashedPassword = await bcrypt.hash(newUser.password, 10);
     newUser.password = hashedPassword;
 
-    const savedUser = await newUser.save();
+    const savedUser = await this.userRepo.save(newUser);
     return removePassword(savedUser);
-  }
-
-  async remove(id: string) {
-    const user = await this.userModel.findByIdAndDelete(id).exec();
-    if (!user) throw new NotFoundException(`User with id ${id} not found`);
-    return true;
   }
 }
