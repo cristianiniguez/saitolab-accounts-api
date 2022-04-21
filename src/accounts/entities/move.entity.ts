@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Account } from './account.entity';
 import { MoveType } from '../models/move.model';
+import { DecimalTransformer } from 'src/common/transformers/decimal.transformer';
 
 @Entity()
 export class Move {
@@ -11,7 +12,13 @@ export class Move {
   @Column({ length: 64, nullable: false, type: 'varchar' })
   detail: string;
 
-  @Column({ nullable: false, type: 'decimal' })
+  @Column({
+    nullable: false,
+    precision: 8,
+    scale: 2,
+    transformer: new DecimalTransformer(),
+    type: 'decimal',
+  })
   amount: number;
 
   @Column({ nullable: false, type: 'date' })
