@@ -55,4 +55,9 @@ export class MovesService {
     this.moveRepo.merge(move, rest);
     return this.moveRepo.save(move);
   }
+
+  async remove(id: number, user: User) {
+    const move = await this.findOne(id, user);
+    return this.moveRepo.delete(move.id);
+  }
 }

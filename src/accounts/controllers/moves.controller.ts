@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -39,5 +40,10 @@ export class MovesController {
     @Body() data: UpdateMoveDTO,
   ) {
     return this.movesService.update(id, data, request.user as User);
+  }
+
+  @Delete(':id')
+  delete(@Req() request: Request, @Param('id', ParseIntPipe) id: number) {
+    return this.movesService.remove(id, request.user as User);
   }
 }
