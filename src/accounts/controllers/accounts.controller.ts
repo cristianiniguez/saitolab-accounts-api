@@ -21,7 +21,7 @@ import { CreateAccountDTO, UpdateAccountDTO } from '../dtos/accounts.dto';
 @Controller('accounts')
 @UseGuards(JwtAuthGuard)
 export class AccountsController {
-  constructor(private accountsService: AccountsService) {}
+  constructor(private readonly accountsService: AccountsService) {}
 
   @Get()
   findAll(@Req() request: Request) {

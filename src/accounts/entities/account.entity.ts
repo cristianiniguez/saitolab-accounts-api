@@ -1,6 +1,13 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { User } from 'src/users/entities/user.entity';
+import { Move } from '../entities/move.entity';
 
 @Entity()
 export class Account {
@@ -12,4 +19,7 @@ export class Account {
 
   @ManyToOne(() => User)
   user: User;
+
+  @OneToMany(() => Move, (move) => move.account)
+  moves: Move[];
 }

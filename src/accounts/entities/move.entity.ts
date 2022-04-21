@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
+import { Account } from './account.entity';
 import { MoveType } from '../models/move.model';
 
 @Entity()
@@ -18,4 +19,7 @@ export class Move {
 
   @Column({ length: 8, nullable: false, type: 'varchar' })
   type: MoveType;
+
+  @ManyToOne(() => Account)
+  account: Account;
 }

@@ -19,6 +19,7 @@ export class AccountsService {
 
   async findOne(id: number, user: User) {
     const account = await this.accountRepo.findOne({
+      relations: ['moves'],
       where: { id, user: user.id },
     });
 
