@@ -1,4 +1,13 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { Request } from 'express';
 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -11,6 +20,11 @@ import { CreateMoveDTO } from '../dtos/moves.dto';
 @UseGuards(JwtAuthGuard)
 export class MovesController {
   constructor(private readonly movesService: MovesService) {}
+
+  @Get(':id')
+  findOne(@Req() request: Request, @Param('id', ParseIntPipe) id: number) {
+    return this.movesService.findOne(id, request.user as User);
+  }
 
   @Post()
   create(@Req() request: Request, @Body() data: CreateMoveDTO) {
