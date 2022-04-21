@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -14,7 +15,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { User } from 'src/users/entities/user.entity';
 
 import { MovesService } from '../services/moves.service';
-import { CreateMoveDTO } from '../dtos/moves.dto';
+import { CreateMoveDTO, UpdateMoveDTO } from '../dtos/moves.dto';
 
 @Controller('moves')
 @UseGuards(JwtAuthGuard)
@@ -29,5 +30,14 @@ export class MovesController {
   @Post()
   create(@Req() request: Request, @Body() data: CreateMoveDTO) {
     return this.movesService.create(data, request.user as User);
+  }
+
+  @Put(':id')
+  update(
+    @Req() request: Request,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateMoveDTO,
+  ) {
+    return this.movesService.update(id, data, request.user as User);
   }
 }
