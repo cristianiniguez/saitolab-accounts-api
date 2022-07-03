@@ -58,6 +58,37 @@ describe('Auth Module (e2e)', () => {
     });
   });
 
+  describe('/auth/sign-in (POST)', () => {
+    beforeEach(async () => {
+      // deleting all possible users
+      await request(app.getHttpServer()).delete('/test/users');
+
+      // creating a new user
+      await request(app.getHttpServer()).post('/auth/sign-up').send(testUser);
+    });
+
+    it('should return 201 when using valid credentials', () => {
+      return request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .auth(testUser.email, testUser.password, { type: 'basic' })
+        .expect(201);
+    });
+
+    it('should return 401 when using invalid email', () => {
+      return request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .auth('someone', testUser.password, { type: 'basic' })
+        .expect(401);
+    });
+
+    it('should return 401 when using invalid password', () => {
+      return request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .auth(testUser.email, 'else', { type: 'basic' })
+        .expect(401);
+    });
+  });
+
   afterEach(async () => {
     await app.close();
   });
