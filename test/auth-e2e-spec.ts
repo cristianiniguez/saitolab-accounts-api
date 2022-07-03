@@ -145,6 +145,55 @@ describe('Auth Module (e2e)', () => {
     });
   });
 
+  describe('/auth/check (GET)', () => {
+    let token: string;
+
+    beforeEach(async () => {
+      // deleting all possible users
+      await request(app.getHttpServer()).delete('/test/users');
+
+      // creating a new user
+      await request(app.getHttpServer()).post('/auth/sign-up').send(testUser);
+
+      // signing in
+      const response = await request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .auth(testUser.email, testUser.password, { type: 'basic' });
+
+      // saving the token
+      token = response.body.access_token;
+    });
+
+    it('should return 200 (OK) when sending a correct token', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/auth/check')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const { email, firstName, lastName } = testUser;
+
+      expect(response.body).toEqual({
+        id: expect.any(Number),
+        email,
+        firstName,
+        lastName,
+        role: 'client',
+      });
+    });
+
+    it('should return 401 (Unauthorized) when sending an incorrect token', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/auth/check')
+        .set('Authorization', `Bearer 12346789`)
+        .expect(401);
+
+      expect(response.body).toEqual({
+        statusCode: 401,
+        message: 'Unauthorized',
+      });
+    });
+  });
+
   afterEach(async () => {
     await app.close();
   });
