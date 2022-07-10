@@ -31,7 +31,7 @@ describe('Auth Module (e2e)', () => {
 
   describe('/auth/sign-up (POST)', () => {
     beforeEach(async () => {
-      await request(app.getHttpServer()).delete('/test/users');
+      await request(app.getHttpServer()).delete('/test');
     });
 
     it('should return 201 (Created) when using a correct body', async () => {
@@ -91,8 +91,8 @@ describe('Auth Module (e2e)', () => {
 
   describe('/auth/sign-in (POST)', () => {
     beforeEach(async () => {
-      // deleting all possible users
-      await request(app.getHttpServer()).delete('/test/users');
+      // deleting all data
+      await request(app.getHttpServer()).delete('/test');
 
       // creating a new user
       await request(app.getHttpServer()).post('/auth/sign-up').send(testUser);
@@ -149,8 +149,8 @@ describe('Auth Module (e2e)', () => {
     let token: string;
 
     beforeEach(async () => {
-      // deleting all possible users
-      await request(app.getHttpServer()).delete('/test/users');
+      // deleting all data
+      await request(app.getHttpServer()).delete('/test');
 
       // creating a new user
       await request(app.getHttpServer()).post('/auth/sign-up').send(testUser);
