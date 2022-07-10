@@ -1,14 +1,9 @@
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
 
-const testUser = {
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john@example.com',
-  password: 'password',
-};
+import { AppModule } from '../src/app.module';
+import { testUser1 as testUser } from './mocks/users.mock';
 
 describe('Auth Module (e2e)', () => {
   let app: INestApplication;
