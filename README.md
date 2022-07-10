@@ -42,6 +42,9 @@ $ docker compose -d pgadmin
 
 # start the development server
 $ npm run start:dev
+
+# after working, stop containers
+$ docker compose down
 ```
 
 ## Migrations
@@ -61,8 +64,23 @@ $ npm run migration:show
 
 ## Test
 
+Unit testing is not available yet. Don't use unit test commands from **_package.json_**.
+
+For e2e testing:
+
 ```bash
-# coming soon
+# start test postgresql container
+$ docker compose -f docker-compose.test.yml up -d postgres
+
+# run migrations
+$ npm run migration:run
+
+# on .env file change dev to test in DATABASE_URL
+# then start the e2e test
+$ npm run test:e2e
+
+# after testing
+$ docker compose -f docker-compose.test.yml down
 ```
 
 ## Do you want to contribute to this project?
