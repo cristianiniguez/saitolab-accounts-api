@@ -98,17 +98,21 @@ describe('Moves Module (e2e)', () => {
     });
   });
 
-  describe('(GET) /accounts/:id', () => {
-    it('should return 200 (OK) and account info when using valid id', async () => {
+  describe('(GET|PUT|DELETE) /moves/:id', () => {
+    let savedMoveId: string;
+
+    beforeEach(async () => {
       const postMoveResponse = await request(app.getHttpServer())
         .post('/moves')
         .set('Authorization', `Bearer ${token}`)
         .send({ ...testMove1, account: accountId });
 
-      const id = postMoveResponse.body.id;
+      savedMoveId = postMoveResponse.body.id;
+    });
 
+    it('(GET) should return 200 (OK) and account info when using valid id', async () => {
       const getMoveResponse = await request(app.getHttpServer())
-        .get(`/moves/${id}`)
+        .get(`/moves/${savedMoveId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
@@ -122,9 +126,35 @@ describe('Moves Module (e2e)', () => {
       });
     });
 
-    it('should return 404 (Not Found) when using invalid id', async () => {
-      const testId = 123;
+    it('(PUT) should return 200 (OK) and updated account info when using valid id', async () => {
+      const putMoveResponse = await request(app.getHttpServer())
+        .put(`/moves/${savedMoveId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(testMove2)
+        .expect(200);
 
+      expect(putMoveResponse.body).toEqual({
+        account: expect.any(Object),
+        amount: testMove2.amount,
+        date: testMove2.date,
+        detail: testMove2.detail,
+        id: savedMoveId,
+        type: testMove2.type,
+      });
+    });
+
+    it('(DELETE) should return 200 (OK) when using valid id', async () => {
+      await request(app.getHttpServer())
+        .delete(`/moves/${savedMoveId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+    });
+  });
+
+  describe('(GET|PUT|DELETE) /moves/:id with invalid move id', () => {
+    const testId = 123;
+
+    it('(GET) should return 404 (Not Found) when reading not existing account', async () => {
       const getMoveResponse = await request(app.getHttpServer())
         .get(`/moves/${testId}`)
         .set('Authorization', `Bearer ${token}`)
@@ -137,70 +167,7 @@ describe('Moves Module (e2e)', () => {
       });
     });
 
-    it("should return 404 (Not Found) when using other user's move id", async () => {
-      // creating a second user
-      await request(app.getHttpServer()).post('/auth/sign-up').send(testUser2);
-
-      // signing in second user
-      const signInResponse = await request(app.getHttpServer())
-        .post('/auth/sign-in')
-        .auth(testUser2.email, testUser2.password, { type: 'basic' });
-
-      // saving the token of the second user
-      const secondToken = signInResponse.body.access_token;
-
-      // creating an account for the second user
-      const postAccountResponse = await request(app.getHttpServer())
-        .post('/accounts')
-        .set('Authorization', `Bearer ${secondToken}`)
-        .send(testAccount2);
-
-      const accountId = postAccountResponse.body.id;
-
-      // creating a move for the second account
-      const postMoveResponse = await request(app.getHttpServer())
-        .post('/moves')
-        .set('Authorization', `Bearer ${secondToken}`)
-        .send({ ...testMove2, account: accountId });
-
-      const moveId = postMoveResponse.body.id;
-
-      // reading the account but as the first user
-      await request(app.getHttpServer())
-        .get(`/moves/${moveId}`)
-        .set('Authorization', `Bearer ${token}`)
-        .expect(404);
-    });
-  });
-
-  describe('(PUT) /accounts/:id', () => {
-    it('should return 200 (OK) and updated account info when using valid id', async () => {
-      const postMoveResponse = await request(app.getHttpServer())
-        .post('/moves')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ ...testMove1, account: accountId });
-
-      const id = postMoveResponse.body.id;
-
-      const putMoveResponse = await request(app.getHttpServer())
-        .put(`/moves/${id}`)
-        .set('Authorization', `Bearer ${token}`)
-        .send(testMove2)
-        .expect(200);
-
-      expect(putMoveResponse.body).toEqual({
-        account: expect.any(Object),
-        amount: testMove2.amount,
-        date: testMove2.date,
-        detail: testMove2.detail,
-        id,
-        type: testMove2.type,
-      });
-    });
-
-    it('should return 404 (Not Found) when using invalid id', async () => {
-      const testId = 123;
-
+    it('(PUT) should return 404 (Not Found) when updating not existing account', async () => {
       const putMoveResponse = await request(app.getHttpServer())
         .put(`/moves/${testId}`)
         .set('Authorization', `Bearer ${token}`)
@@ -214,68 +181,18 @@ describe('Moves Module (e2e)', () => {
       });
     });
 
-    it("should return 404 (Not Found) when using other user's account id", async () => {
-      // creating a second user
-      await request(app.getHttpServer()).post('/auth/sign-up').send(testUser2);
-
-      // signing in second user
-      const signInResponse = await request(app.getHttpServer())
-        .post('/auth/sign-in')
-        .auth(testUser2.email, testUser2.password, { type: 'basic' });
-
-      // saving the token of the second user
-      const secondToken = signInResponse.body.access_token;
-
-      // creating an account for the second user
-      const postAccountResponse = await request(app.getHttpServer())
-        .post('/accounts')
-        .set('Authorization', `Bearer ${secondToken}`)
-        .send(testAccount2);
-
-      const accountId = postAccountResponse.body.id;
-
-      // creating a move for the second account
-      const postMoveResponse = await request(app.getHttpServer())
-        .post('/moves')
-        .set('Authorization', `Bearer ${secondToken}`)
-        .send({ ...testMove2, account: accountId });
-
-      const moveId = postMoveResponse.body.id;
-
-      // updating the move but as the first user
-      await request(app.getHttpServer())
-        .put(`/accounts/${moveId}`)
-        .set('Authorization', `Bearer ${token}`)
-        .send(testAccount2)
-        .expect(404);
-    });
-  });
-
-  describe('(DELETE) /accounts/:id', () => {
-    it('should return 200 (OK) when using valid id', async () => {
-      const postMoveResponse = await request(app.getHttpServer())
-        .post('/moves')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ ...testMove1, account: accountId });
-
-      const id = postMoveResponse.body.id;
-
-      await request(app.getHttpServer())
-        .delete(`/moves/${id}`)
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
-    });
-
-    it('should return 404 (Not Found) when using invalid id', async () => {
-      const testId = 123;
-
+    it('(DELETE) should return 404 (Not Found) when deleting not existing account', async () => {
       await request(app.getHttpServer())
         .delete(`/moves/${testId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
+  });
 
-    it("should return 404 (Not Found) when using other user's account id", async () => {
+  describe("(GET|PUT|DELETE) /moves/:id with other users's move id", () => {
+    let otherMoveId: string;
+
+    beforeEach(async () => {
       // creating a second user
       await request(app.getHttpServer()).post('/auth/sign-up').send(testUser2);
 
@@ -301,11 +218,27 @@ describe('Moves Module (e2e)', () => {
         .set('Authorization', `Bearer ${secondToken}`)
         .send({ ...testMove2, account: accountId });
 
-      const moveId = postMoveResponse.body.id;
+      otherMoveId = postMoveResponse.body.id;
+    });
 
-      // deleting the account but as the first user
+    it("(GET) should return 404 (Not Found) when reading other user's move", async () => {
       await request(app.getHttpServer())
-        .delete(`/moves/${moveId}`)
+        .get(`/moves/${otherMoveId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404);
+    });
+
+    it("(PUT) should return 404 (Not Found) when updating other user's move", async () => {
+      await request(app.getHttpServer())
+        .put(`/accounts/${otherMoveId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(testAccount2)
+        .expect(404);
+    });
+
+    it("(DELETE) should return 404 (Not Found) when deleting other user's move", async () => {
+      await request(app.getHttpServer())
+        .delete(`/moves/${otherMoveId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
