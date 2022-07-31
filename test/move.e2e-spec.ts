@@ -34,30 +34,32 @@ describe('Moves Module (e2e)', () => {
     await request(app.getHttpServer()).post('/auth/sign-up').send(testUser1);
 
     // signing in
-    const response = await request(app.getHttpServer())
+    const signInResponse = await request(app.getHttpServer())
       .post('/auth/sign-in')
       .auth(testUser1.email, testUser1.password, { type: 'basic' });
 
     // saving the token
-    token = response.body.access_token;
+    token = signInResponse.body.access_token;
 
     // creating an account and saving the id
-    const response2 = await request(app.getHttpServer())
+    const postAccountResponse = await request(app.getHttpServer())
       .post('/accounts')
       .set('Authorization', `Bearer ${token}`)
       .send(testAccount1);
-    accountId = response2.body.id;
+
+    // saving the account id
+    accountId = postAccountResponse.body.id;
   });
 
   describe('(POST) /moves', () => {
     it('should return 201 (Created) and create the move when using a correct body', async () => {
-      const response = await request(app.getHttpServer())
+      const postMoveResponse = await request(app.getHttpServer())
         .post('/moves')
         .set('Authorization', `Bearer ${token}`)
         .send({ ...testMove1, account: accountId })
         .expect(201);
 
-      expect(response.body).toEqual({
+      expect(postMoveResponse.body).toEqual({
         account: expect.any(Object),
         amount: testMove1.amount,
         date: testMove1.date,
@@ -68,13 +70,13 @@ describe('Moves Module (e2e)', () => {
     });
 
     it('should return 400 (Bad Request) when using a not correct body', async () => {
-      const response = await request(app.getHttpServer())
+      const postMoveResponse = await request(app.getHttpServer())
         .post('/moves')
         .set('Authorization', `Bearer ${token}`)
         .send({})
         .expect(400);
 
-      expect(response.body).toEqual({
+      expect(postMoveResponse.body).toEqual({
         statusCode: 400,
         message: [
           'detail should not be empty',
@@ -98,19 +100,19 @@ describe('Moves Module (e2e)', () => {
 
   describe('(GET) /accounts/:id', () => {
     it('should return 200 (OK) and account info when using valid id', async () => {
-      const response = await request(app.getHttpServer())
+      const postMoveResponse = await request(app.getHttpServer())
         .post('/moves')
         .set('Authorization', `Bearer ${token}`)
         .send({ ...testMove1, account: accountId });
 
-      const id = response.body.id;
+      const id = postMoveResponse.body.id;
 
-      const response2 = await request(app.getHttpServer())
+      const getMoveResponse = await request(app.getHttpServer())
         .get(`/moves/${id}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      expect(response2.body).toEqual({
+      expect(getMoveResponse.body).toEqual({
         account: expect.any(Object),
         amount: testMove1.amount,
         date: testMove1.date,
@@ -123,14 +125,14 @@ describe('Moves Module (e2e)', () => {
     it('should return 404 (Not Found) when using invalid id', async () => {
       const testId = 123;
 
-      const response = await request(app.getHttpServer())
+      const getMoveResponse = await request(app.getHttpServer())
         .get(`/moves/${testId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
 
-      expect(response.body).toEqual({
+      expect(getMoveResponse.body).toEqual({
         error: 'Not Found',
-        message: `Move with id ${123} not found`,
+        message: `Move with id ${testId} not found`,
         statusCode: 404,
       });
     });
@@ -140,28 +142,28 @@ describe('Moves Module (e2e)', () => {
       await request(app.getHttpServer()).post('/auth/sign-up').send(testUser2);
 
       // signing in second user
-      const response = await request(app.getHttpServer())
+      const signInResponse = await request(app.getHttpServer())
         .post('/auth/sign-in')
         .auth(testUser2.email, testUser2.password, { type: 'basic' });
 
       // saving the token of the second user
-      const secondToken = response.body.access_token;
+      const secondToken = signInResponse.body.access_token;
 
       // creating an account for the second user
-      const response2 = await request(app.getHttpServer())
+      const postAccountResponse = await request(app.getHttpServer())
         .post('/accounts')
         .set('Authorization', `Bearer ${secondToken}`)
         .send(testAccount2);
 
-      const accountId = response2.body.id;
+      const accountId = postAccountResponse.body.id;
 
       // creating a move for the second account
-      const response3 = await request(app.getHttpServer())
+      const postMoveResponse = await request(app.getHttpServer())
         .post('/moves')
         .set('Authorization', `Bearer ${secondToken}`)
         .send({ ...testMove2, account: accountId });
 
-      const moveId = response3.body.id;
+      const moveId = postMoveResponse.body.id;
 
       // reading the account but as the first user
       await request(app.getHttpServer())
@@ -173,20 +175,20 @@ describe('Moves Module (e2e)', () => {
 
   describe('(PUT) /accounts/:id', () => {
     it('should return 200 (OK) and updated account info when using valid id', async () => {
-      const response = await request(app.getHttpServer())
+      const postMoveResponse = await request(app.getHttpServer())
         .post('/moves')
         .set('Authorization', `Bearer ${token}`)
         .send({ ...testMove1, account: accountId });
 
-      const id = response.body.id;
+      const id = postMoveResponse.body.id;
 
-      const response2 = await request(app.getHttpServer())
+      const putMoveResponse = await request(app.getHttpServer())
         .put(`/moves/${id}`)
         .set('Authorization', `Bearer ${token}`)
         .send(testMove2)
         .expect(200);
 
-      expect(response2.body).toEqual({
+      expect(putMoveResponse.body).toEqual({
         account: expect.any(Object),
         amount: testMove2.amount,
         date: testMove2.date,
@@ -199,13 +201,13 @@ describe('Moves Module (e2e)', () => {
     it('should return 404 (Not Found) when using invalid id', async () => {
       const testId = 123;
 
-      const response = await request(app.getHttpServer())
+      const putMoveResponse = await request(app.getHttpServer())
         .put(`/moves/${testId}`)
         .set('Authorization', `Bearer ${token}`)
         .send(testMove2)
         .expect(404);
 
-      expect(response.body).toEqual({
+      expect(putMoveResponse.body).toEqual({
         error: 'Not Found',
         message: `Move with id ${testId} not found`,
         statusCode: 404,
@@ -217,28 +219,28 @@ describe('Moves Module (e2e)', () => {
       await request(app.getHttpServer()).post('/auth/sign-up').send(testUser2);
 
       // signing in second user
-      const response = await request(app.getHttpServer())
+      const signInResponse = await request(app.getHttpServer())
         .post('/auth/sign-in')
         .auth(testUser2.email, testUser2.password, { type: 'basic' });
 
       // saving the token of the second user
-      const secondToken = response.body.access_token;
+      const secondToken = signInResponse.body.access_token;
 
       // creating an account for the second user
-      const response2 = await request(app.getHttpServer())
+      const postAccountResponse = await request(app.getHttpServer())
         .post('/accounts')
         .set('Authorization', `Bearer ${secondToken}`)
         .send(testAccount2);
 
-      const accountId = response2.body.id;
+      const accountId = postAccountResponse.body.id;
 
       // creating a move for the second account
-      const response3 = await request(app.getHttpServer())
+      const postMoveResponse = await request(app.getHttpServer())
         .post('/moves')
         .set('Authorization', `Bearer ${secondToken}`)
         .send({ ...testMove2, account: accountId });
 
-      const moveId = response3.body.id;
+      const moveId = postMoveResponse.body.id;
 
       // updating the move but as the first user
       await request(app.getHttpServer())
@@ -251,12 +253,12 @@ describe('Moves Module (e2e)', () => {
 
   describe('(DELETE) /accounts/:id', () => {
     it('should return 200 (OK) when using valid id', async () => {
-      const response = await request(app.getHttpServer())
+      const postMoveResponse = await request(app.getHttpServer())
         .post('/moves')
         .set('Authorization', `Bearer ${token}`)
         .send({ ...testMove1, account: accountId });
 
-      const id = response.body.id;
+      const id = postMoveResponse.body.id;
 
       await request(app.getHttpServer())
         .delete(`/moves/${id}`)
@@ -278,28 +280,28 @@ describe('Moves Module (e2e)', () => {
       await request(app.getHttpServer()).post('/auth/sign-up').send(testUser2);
 
       // signing in second user
-      const response = await request(app.getHttpServer())
+      const signInResponse = await request(app.getHttpServer())
         .post('/auth/sign-in')
         .auth(testUser2.email, testUser2.password, { type: 'basic' });
 
       // saving the token of the second user
-      const secondToken = response.body.access_token;
+      const secondToken = signInResponse.body.access_token;
 
       // creating an account for the second user
-      const response2 = await request(app.getHttpServer())
+      const postAccountResponse = await request(app.getHttpServer())
         .post('/accounts')
         .set('Authorization', `Bearer ${secondToken}`)
         .send(testAccount2);
 
-      const accountId = response2.body.id;
+      const accountId = postAccountResponse.body.id;
 
       // creating a move for the second account
-      const response3 = await request(app.getHttpServer())
+      const postMoveResponse = await request(app.getHttpServer())
         .post('/moves')
         .set('Authorization', `Bearer ${secondToken}`)
         .send({ ...testMove2, account: accountId });
 
-      const moveId = response3.body.id;
+      const moveId = postMoveResponse.body.id;
 
       // deleting the account but as the first user
       await request(app.getHttpServer())

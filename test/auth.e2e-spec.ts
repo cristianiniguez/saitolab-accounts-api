@@ -30,14 +30,14 @@ describe('Auth Module (e2e)', () => {
     });
 
     it('should return 201 (Created) when using a correct body', async () => {
-      const response = await request(app.getHttpServer())
+      const signUpResponse = await request(app.getHttpServer())
         .post('/auth/sign-up')
         .send(testUser)
         .expect(201);
 
       const { email, firstName, lastName } = testUser;
 
-      expect(response.body).toEqual({
+      expect(signUpResponse.body).toEqual({
         email,
         firstName,
         lastName,
@@ -47,12 +47,12 @@ describe('Auth Module (e2e)', () => {
     });
 
     it('should return 400 (Bad Request) when using an empty body', async () => {
-      const response = await request(app.getHttpServer())
+      const signUpResponse = await request(app.getHttpServer())
         .post('/auth/sign-up')
         .send({})
         .expect(400);
 
-      expect(response.body).toEqual({
+      expect(signUpResponse.body).toEqual({
         statusCode: 400,
         message: [
           'email should not be empty',
@@ -71,12 +71,12 @@ describe('Auth Module (e2e)', () => {
     it('should return 400 (Bad Request) when using a repeated email', async () => {
       await request(app.getHttpServer()).post('/auth/sign-up').send(testUser);
 
-      const response = await request(app.getHttpServer())
+      const signUpResponse = await request(app.getHttpServer())
         .post('/auth/sign-up')
         .send(testUser)
         .expect(400);
 
-      expect(response.body).toEqual({
+      expect(signUpResponse.body).toEqual({
         statusCode: 400,
         message: 'Email is already in use',
         error: 'Bad Request',
@@ -96,12 +96,12 @@ describe('Auth Module (e2e)', () => {
     it('should return 201 (Created) when using valid credentials', async () => {
       const { email, firstName, lastName, password } = testUser;
 
-      const response = await request(app.getHttpServer())
+      const signInResponse = await request(app.getHttpServer())
         .post('/auth/sign-in')
         .auth(email, password, { type: 'basic' })
         .expect(201);
 
-      expect(response.body).toEqual({
+      expect(signInResponse.body).toEqual({
         access_token: expect.any(String),
         user: {
           id: expect.any(Number),
@@ -114,12 +114,12 @@ describe('Auth Module (e2e)', () => {
     });
 
     it('should return 401 (Unauthorized) when using invalid email', async () => {
-      const response = await request(app.getHttpServer())
+      const signInResponse = await request(app.getHttpServer())
         .post('/auth/sign-in')
         .auth('someone', testUser.password, { type: 'basic' })
         .expect(401);
 
-      expect(response.body).toEqual({
+      expect(signInResponse.body).toEqual({
         statusCode: 401,
         message: 'Not allowed - Wrong credentials',
         error: 'Unauthorized',
@@ -127,12 +127,12 @@ describe('Auth Module (e2e)', () => {
     });
 
     it('should return 401 (Unauthorized) when using invalid password', async () => {
-      const response = await request(app.getHttpServer())
+      const signInResponse = await request(app.getHttpServer())
         .post('/auth/sign-in')
         .auth(testUser.email, 'else', { type: 'basic' })
         .expect(401);
 
-      expect(response.body).toEqual({
+      expect(signInResponse.body).toEqual({
         statusCode: 401,
         message: 'Not allowed - Wrong credentials',
         error: 'Unauthorized',
@@ -151,23 +151,23 @@ describe('Auth Module (e2e)', () => {
       await request(app.getHttpServer()).post('/auth/sign-up').send(testUser);
 
       // signing in
-      const response = await request(app.getHttpServer())
+      const signInResponse = await request(app.getHttpServer())
         .post('/auth/sign-in')
         .auth(testUser.email, testUser.password, { type: 'basic' });
 
       // saving the token
-      token = response.body.access_token;
+      token = signInResponse.body.access_token;
     });
 
     it('should return 200 (OK) when sending a correct token', async () => {
-      const response = await request(app.getHttpServer())
+      const checkResponse = await request(app.getHttpServer())
         .get('/auth/check')
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       const { email, firstName, lastName } = testUser;
 
-      expect(response.body).toEqual({
+      expect(checkResponse.body).toEqual({
         id: expect.any(Number),
         email,
         firstName,
@@ -177,12 +177,12 @@ describe('Auth Module (e2e)', () => {
     });
 
     it('should return 401 (Unauthorized) when sending an incorrect token', async () => {
-      const response = await request(app.getHttpServer())
+      const checkResponse = await request(app.getHttpServer())
         .get('/auth/check')
         .set('Authorization', `Bearer 12346789`)
         .expect(401);
 
-      expect(response.body).toEqual({
+      expect(checkResponse.body).toEqual({
         statusCode: 401,
         message: 'Unauthorized',
       });
