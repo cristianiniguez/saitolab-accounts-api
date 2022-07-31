@@ -5,21 +5,11 @@ import { TestService } from '../services/test.service';
 export class TestController {
   constructor(private testService: TestService) {}
 
-  @Delete('users')
-  async deleteUsers() {
-    await this.testService.deleteUsers();
-    return 'Users deleted';
-  }
-
-  @Delete('accounts')
-  async deleteAccounts() {
-    await this.testService.deleteAccounts();
-    return 'Accounts deleted';
-  }
-
-  @Delete('moves')
-  async deleteMoves() {
+  @Delete()
+  async reset() {
     await this.testService.deleteMoves();
-    return 'Moves deleted';
+    await this.testService.deleteAccounts();
+    await this.testService.deleteUsers();
+    return 'All data deleted';
   }
 }
