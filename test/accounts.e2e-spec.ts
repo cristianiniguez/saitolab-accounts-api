@@ -99,30 +99,57 @@ describe('Accounts Module (e2e)', () => {
     });
   });
 
-  describe('(GET) /accounts/:id', () => {
-    it('should return 200 (OK) and account info when using valid id', async () => {
-      const getAccountsResponse = await request(app.getHttpServer())
+  describe('(GET|PUT|DELETE) /accounts/:id', () => {
+    let savedAccountId: string;
+
+    beforeEach(async () => {
+      const postAccountResponse = await request(app.getHttpServer())
         .post('/accounts')
         .set('Authorization', `Bearer ${token}`)
         .send(testAccount1);
 
-      const id = getAccountsResponse.body.id;
+      savedAccountId = postAccountResponse.body.id;
+    });
 
+    it('(GET) should return 200 (OK) and account info when using valid id', async () => {
       const getAccountResponse = await request(app.getHttpServer())
-        .get(`/accounts/${id}`)
+        .get(`/accounts/${savedAccountId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       expect(getAccountResponse.body).toEqual({
-        id,
+        id: savedAccountId,
         moves: [],
         name: testAccount1.name,
       });
     });
 
-    it('should return 404 (Not Found) when using invalid id', async () => {
-      const testId = 123;
+    it('(PUT) should return 200 (OK) and updated account info when using valid id', async () => {
+      const putAccountResponse = await request(app.getHttpServer())
+        .put(`/accounts/${savedAccountId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(testAccount2)
+        .expect(200);
 
+      expect(putAccountResponse.body).toEqual({
+        id: savedAccountId,
+        moves: [],
+        name: testAccount2.name,
+      });
+    });
+
+    it('(DELETE) should return 200 (OK) when using valid id', async () => {
+      await request(app.getHttpServer())
+        .delete(`/accounts/${savedAccountId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+    });
+  });
+
+  describe('(GET|PUT|DELETE) /accounts/:id with invalid account id', () => {
+    const testId = 123;
+
+    it('(GET) should return 404 (Not Found) when reading not existing account', async () => {
       const getAccountResponse = await request(app.getHttpServer())
         .get(`/accounts/${testId}`)
         .set('Authorization', `Bearer ${token}`)
@@ -135,59 +162,7 @@ describe('Accounts Module (e2e)', () => {
       });
     });
 
-    it("should return 404 (Not Found) when using other user's account id", async () => {
-      // creating a second user
-      await request(app.getHttpServer()).post('/auth/sign-up').send(testUser2);
-
-      // signing in second user
-      const signInResponse = await request(app.getHttpServer())
-        .post('/auth/sign-in')
-        .auth(testUser2.email, testUser2.password, { type: 'basic' });
-
-      // saving the token of the second user
-      const secondToken = signInResponse.body.access_token;
-
-      // creating an account for the second user
-      const postAccountResponse = await request(app.getHttpServer())
-        .post('/accounts')
-        .set('Authorization', `Bearer ${secondToken}`)
-        .send(testAccount2);
-
-      const id = postAccountResponse.body.id;
-
-      // reading the account but as the first user
-      await request(app.getHttpServer())
-        .get(`/accounts/${id}`)
-        .set('Authorization', `Bearer ${token}`)
-        .expect(404);
-    });
-  });
-
-  describe('(PUT) /accounts/:id', () => {
-    it('should return 200 (OK) and updated account info when using valid id', async () => {
-      const postAccountResponse = await request(app.getHttpServer())
-        .post('/accounts')
-        .set('Authorization', `Bearer ${token}`)
-        .send(testAccount1);
-
-      const id = postAccountResponse.body.id;
-
-      const putAccountResponse = await request(app.getHttpServer())
-        .put(`/accounts/${id}`)
-        .set('Authorization', `Bearer ${token}`)
-        .send(testAccount2)
-        .expect(200);
-
-      expect(putAccountResponse.body).toEqual({
-        id,
-        moves: [],
-        name: testAccount2.name,
-      });
-    });
-
-    it('should return 404 (Not Found) when using invalid id', async () => {
-      const testId = 123;
-
+    it('(PUT) should return 404 (Not Found) when updating not existing account', async () => {
       const putAccountResponse = await request(app.getHttpServer())
         .put(`/accounts/${testId}`)
         .set('Authorization', `Bearer ${token}`)
@@ -201,60 +176,18 @@ describe('Accounts Module (e2e)', () => {
       });
     });
 
-    it("should return 404 (Not Found) when using other user's account id", async () => {
-      // creating a second user
-      await request(app.getHttpServer()).post('/auth/sign-up').send(testUser2);
-
-      // signing in second user
-      const signInResponse = await request(app.getHttpServer())
-        .post('/auth/sign-in')
-        .auth(testUser2.email, testUser2.password, { type: 'basic' });
-
-      // saving the token of the second user
-      const secondToken = signInResponse.body.access_token;
-
-      // creating an account for the second user
-      const postAccountResponse = await request(app.getHttpServer())
-        .post('/accounts')
-        .set('Authorization', `Bearer ${secondToken}`)
-        .send(testAccount2);
-
-      const id = postAccountResponse.body.id;
-
-      // updating the account but as the first user
-      await request(app.getHttpServer())
-        .put(`/accounts/${id}`)
-        .set('Authorization', `Bearer ${token}`)
-        .send(testAccount2)
-        .expect(404);
-    });
-  });
-
-  describe('(DELETE) /accounts/:id', () => {
-    it('should return 200 (OK) when using valid id', async () => {
-      const postAccountResponse = await request(app.getHttpServer())
-        .post('/accounts')
-        .set('Authorization', `Bearer ${token}`)
-        .send(testAccount1);
-
-      const id = postAccountResponse.body.id;
-
-      await request(app.getHttpServer())
-        .delete(`/accounts/${id}`)
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
-    });
-
-    it('should return 404 (Not Found) when using invalid id', async () => {
-      const testId = 123;
-
+    it('(DELETE) should return 404 (Not Found) when deleting not existing account', async () => {
       await request(app.getHttpServer())
         .delete(`/accounts/${testId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
+  });
 
-    it("should return 404 (Not Found) when using other user's account id", async () => {
+  describe("(GET|PUT|DELETE) /accounts/:id with other users's account id", () => {
+    let otherAccountId: string;
+
+    beforeEach(async () => {
       // creating a second user
       await request(app.getHttpServer()).post('/auth/sign-up').send(testUser2);
 
@@ -272,11 +205,27 @@ describe('Accounts Module (e2e)', () => {
         .set('Authorization', `Bearer ${secondToken}`)
         .send(testAccount2);
 
-      const id = postAccountResponse.body.id;
+      otherAccountId = postAccountResponse.body.id;
+    });
 
-      // deleting the account but as the first user
+    it("(GET) should return 404 (Not Found) when reading other user's account", async () => {
       await request(app.getHttpServer())
-        .delete(`/accounts/${id}`)
+        .get(`/accounts/${otherAccountId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404);
+    });
+
+    it("(PUT) should return 404 (Not Found) when updating other user's account", async () => {
+      await request(app.getHttpServer())
+        .put(`/accounts/${otherAccountId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(testAccount2)
+        .expect(404);
+    });
+
+    it("(DELETE) should return 404 (Not Found) when deleting other user's account", async () => {
+      await request(app.getHttpServer())
+        .delete(`/accounts/${otherAccountId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
