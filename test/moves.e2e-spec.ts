@@ -230,9 +230,9 @@ describe('Moves Module (e2e)', () => {
 
     it("(PUT) should return 404 (Not Found) when updating other user's move", async () => {
       await request(app.getHttpServer())
-        .put(`/accounts/${otherMoveId}`)
+        .put(`/moves/${otherMoveId}`)
         .set('Authorization', `Bearer ${token}`)
-        .send(testAccount2)
+        .send(testMove2)
         .expect(404);
     });
 
