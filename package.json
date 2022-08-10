@@ -19,11 +19,11 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./jest-e2e.json -i",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "migration:generate": "npm run typeorm -- migration:generate -n",
-    "migration:run": "npm run typeorm -- migration:run",
-    "migration:show": "npm run typeorm -- migration:show",
-    "migration:drop": "npm run typeorm -- migration:drop",
+    "typeorm": "typeorm-ts-node-esm",
+    "migration:generate": "npm run typeorm migration:generate -n",
+    "migration:run": "npm run typeorm migration:run -- -d src/data-source",
+    "migration:show": "npm run typeorm migration:show -- -d src/data-source",
+    "migration:revert": "npm run typeorm migration:revert -- -d src/data-source",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -34,7 +34,7 @@
     "@nestjs/mapped-types": "^1.0.1",
     "@nestjs/passport": "^8.2.1",
     "@nestjs/platform-express": "^8.4.2",
-    "@nestjs/typeorm": "^8.0.3",
+    "@nestjs/typeorm": "^9.0.0",
     "bcrypt": "^5.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
@@ -48,7 +48,7 @@
     "rxjs": "^7.5.5",
     "ts-node": "^10.7.0",
     "tsconfig-paths": "^3.14.1",
-    "typeorm": "^0.2.45",
+    "typeorm": "^0.3.7",
     "typescript": "^4.6.2"
   },
   "devDependencies": {
