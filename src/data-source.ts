@@ -1,8 +1,11 @@
 import { DataSource } from 'typeorm';
+import { loadEnvironment } from './environments';
+
+loadEnvironment();
 
 export const dataSource = new DataSource({
   type: 'postgres',
-  url: 'postgresql://root:root@localhost:5432/dev',
+  url: process.env.DATABASE_URL,
   synchronize: false,
   logging: false,
   migrations: ['src/database/migrations/*.ts'],

@@ -5,7 +5,7 @@ import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { environments } from './environments';
+import { getEnvFileName } from './environments';
 import { DatabaseModule } from './database/database.module';
 import { TestModule } from './test/test.module';
 import config from './config';
@@ -16,7 +16,7 @@ import { AccountsModule } from './accounts/accounts.module';
 
 const NormalModules: ModuleMetadata['imports'] = [
   ConfigModule.forRoot({
-    envFilePath: environments[process.env.NODE_ENV || 'dev'] || '.env',
+    envFilePath: getEnvFileName(),
     isGlobal: true,
     load: [config],
     validationSchema: Joi.object({
