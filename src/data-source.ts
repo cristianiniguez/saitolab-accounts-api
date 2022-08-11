@@ -1,7 +1,9 @@
-/**
- * @type {import('typeorm').ConnectionOptions}
- */
-const connectionOptions = {
+import { DataSource } from 'typeorm';
+import { loadEnvironment } from './environments';
+
+loadEnvironment();
+
+export const dataSource = new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,
   synchronize: false,
@@ -9,11 +11,8 @@ const connectionOptions = {
   migrations: ['src/database/migrations/*.ts'],
   migrationsTableName: 'migrations',
   entities: ['src/**/*.entity.ts'],
-  cli: { migrationsDir: 'src/database/migrations' },
   ssl:
     process.env.NODE_ENV === 'production'
       ? { rejectUnauthorized: false }
       : false,
-};
-
-module.exports = connectionOptions;
+});

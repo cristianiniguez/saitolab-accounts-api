@@ -19,14 +19,17 @@ export class MovesService {
   ) {}
 
   async findOne(id: number, user: User) {
-    const move = await this.moveRepo.findOne(id, { relations: ['account'] });
+    const move = await this.moveRepo.findOne({
+      where: { id },
+      relations: ['account'],
+    });
 
     // the move should exist
     if (!move) throw new NotFoundException(`Move with id ${id} not found`);
 
     // the move should belong to an account that belongs to the user
     const account = await this.accountRepo.findOne({
-      where: { id: move.account.id, user: user.id },
+      where: { id: move.account.id, user: { id: user.id } },
     });
     if (!account) throw new NotFoundException(`Move with id ${id} not found`);
 

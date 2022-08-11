@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Account } from './account.entity';
 import { MoveType } from '../models/move.model';
-import { DecimalTransformer } from 'src/common/transformers/decimal.transformer';
+import { DecimalTransformer } from '../../common/transformers/decimal.transformer';
 
 @Entity()
 export class Move {

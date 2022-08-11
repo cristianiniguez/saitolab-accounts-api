@@ -14,13 +14,13 @@ export class AccountsService {
   ) {}
 
   findAll(user: User) {
-    return this.accountRepo.find({ where: { user: user.id } });
+    return this.accountRepo.find({ where: { user: { id: user.id } } });
   }
 
   async findOne(id: number, user: User) {
     const account = await this.accountRepo.findOne({
       relations: ['moves'],
-      where: { id, user: user.id },
+      where: { id, user: { id: user.id } },
     });
 
     if (!account)
