@@ -16,5 +16,4 @@ export const loadEnvironment = () => {
   dotenv.config({
     path: path.resolve(process.cwd(), getEnvFileName()),
   });
-  console.log(process.env.DATABASE_URL);
 };
