@@ -4,6 +4,7 @@ import * as path from 'path';
 export const environments = {
   dev: '.env',
   staging: '.env.staging',
+  test: '.env.test',
   production: '.env.production',
 };
 
@@ -15,4 +16,5 @@ export const loadEnvironment = () => {
   dotenv.config({
     path: path.resolve(process.cwd(), getEnvFileName()),
   });
+  console.log(process.env.DATABASE_URL);
 };
