@@ -11,5 +11,8 @@ export const dataSource = new DataSource({
   migrations: ['src/database/migrations/*.ts'],
   migrationsTableName: 'migrations',
   entities: ['src/**/*.entity.ts'],
-  ssl: false,
+  ssl:
+    process.env.NODE_ENV === 'production'
+      ? { rejectUnauthorized: false }
+      : false,
 });
