@@ -38,7 +38,7 @@ $ npm run migration:run
 
 ```bash
 # start postgresql and pgadmin docker containers (if it is not turned on)
-$ docker compose -d pgadmin
+$ docker compose -d pgadmin-dev
 
 # start the development server
 $ npm run start:dev
@@ -53,7 +53,7 @@ As we are using TypeORM we need to make migrations after cloning the repo and ev
 
 ```bash
 # generate the migration
-$ npm tun migration:generate
+$ npm run migration:generate <use any name>
 
 # run the migration
 $ npm run migration:run
@@ -70,12 +70,14 @@ For e2e testing:
 
 ```bash
 # start test postgresql container
-$ docker compose -f docker-compose.test.yml up -d postgres
+$ docker compose -f docker-compose.test.yml up -d postgres-test
+
+# copy and past .env.example file to a .env.test file (then fill the variables)
+$ cp .env.example .env.test
 
 # run migrations
-$ npm run migration:run
+$ NODE_ENV=test npm run migration:run
 
-# on .env file change dev to test in DATABASE_URL
 # then start the e2e test
 $ npm run test:e2e
 
